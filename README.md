@@ -1,3 +1,2 @@
 # HelloNew
-Gospel for you.
-thank you !
+Gospel for you.Amen!bless you too!
