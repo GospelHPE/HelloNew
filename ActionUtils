@@ -1,0 +1,153 @@
+package com.hpe.exec;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import com.hpe.exec.ActionEvent.ActionType;
+import com.hpe.exec.RecordPoint.RecordType;
+
+/**
+ * @author syl 2017/04/19 14:00
+ */
+public class ActionUtils {
+
+	private static final String TAG = ActionUtils.class.getSimpleName();
+
+	/** action events */
+	private static List<ActionEvent> mEvents = new ArrayList<ActionEvent>();
+
+	public ActionUtils() {
+
+	}
+
+	public ActionUtils(List<ActionEvent> mEvents) {
+		this.mEvents = mEvents;
+	}
+
+	public static ActionEvent parseFromString(String s, long millis) {
+		String str = s.trim();
+		if (s == null || s.equals(" ") || s.equals("")
+				|| s.trim().length() == 0)
+			return null;
+		// if (StringUtil.isNullOrBlank(s)) {
+		// return null;
+		// }
+		String[] strs = str.split("\\s+");
+		if (strs == null || strs.length < 4) {
+			return null;
+		}
+
+		ActionType type = null;
+		int extra = 0;
+		if ("DOWN".equals(strs[3])) {
+			type = ActionType.PRESS_DOWN;
+		} else if ("UP".equals(strs[3])) {
+			type = ActionType.PRESS_UP;
+		} else if ("ABS_MT_POSITION_X".equals(strs[2])) {
+			type = ActionType.POINT_COORD_X;
+		} else if ("ABS_MT_POSITION_Y".equals(strs[2])) {
+			type = ActionType.POINT_COORD_Y;
+		} else {
+			// Logger.e(TAG, "fail to parse event String: '" + s + "'");
+			return null;
+		}
+		if (type == ActionType.POINT_COORD_X
+				|| type == ActionType.POINT_COORD_Y) {
+			extra = Integer.parseInt(strs[3], 16);
+		}
+		// return ActionEvent.newBuilder().setActionType(type).setMillis(millis)
+		// .setExtra(extra).build();
+		ActionEvent ae = new ActionEvent();
+		ae.setExtra_(extra);
+		ae.setMillis_(millis);
+		ae.setActionType_(type);
+		return ae;
+	}
+
+	/** Get last action location and type performed on the touch screen */
+	public boolean resolveAction() {
+		RecordPoint.RecordType action = RecordType.NONE;
+		int downX = -1, downY = -1, upX = -1, upY = -1;
+		int lastX = -1, lastY = -1;
+		int moveX = -1, moveY = -1;
+		long pressDownMillis = -1;
+		long pressUpMillis = 0;
+		final long sysLongPressTime = 500;
+		// new
+		// InstrumentationUiAutomatorBridge(getInstrumentation().getContext(),
+		// getInstrumentation().getUiAutomation())
+		// .getSystemLongPressTime();
+		// System.currentTimeMillis();// LogicLayerContext.getUiLongPressTime();
+		// synchronized (mEvents) {
+		// get the millis of latest 'DOWN' and 'UP'
+		for (ActionEvent event : mEvents) {
+			ActionEvent.ActionType type = event.getActionType();
+			if (type == ActionEvent.ActionType.PRESS_DOWN) {
+				pressDownMillis = event.getMillis();
+			} else if (type == ActionEvent.ActionType.PRESS_UP) {
+				pressUpMillis = event.getMillis();
+			} else if (type == ActionEvent.ActionType.POINT_COORD_X) {
+				if (downX < 0) {
+					downX = (int) event.getExtra();
+					lastX = downX;
+				}
+				upX = (int) event.getExtra();
+				moveX += Math.abs(upX - lastX);
+				lastX = upX;
+
+			} else if (type == ActionEvent.ActionType.POINT_COORD_Y) {
+				if (downY < 0) {
+					downY = (int) event.getExtra();
+					lastY = downY;
+				}
+				upY = (int) event.getExtra();
+				moveY += Math.abs(upY - lastY);
+				lastY = upY;
+			}
+		}
+		mEvents.clear();
+		// }
+
+		// no action found
+		if (pressDownMillis == -1) {
+			return false;
+		}
+		int moveXAbs = Math.abs(moveX);
+		int moveYAbs = Math.abs(moveY);
+		// Log.i(TAG, "moveXAbs:" + moveXAbs + ",moveYAbs:" + moveYAbs);
+		System.out.println(TAG + "  moveXAbs:" + moveXAbs + ",moveYAbs:"
+				+ moveYAbs);
+		if (isClick(moveXAbs, moveYAbs)) {
+			long interval = pressUpMillis - pressDownMillis;
+			if (interval >= sysLongPressTime) {
+				action = RecordType.LONGCLICK;
+			} else {
+				action = RecordType.CLICK;
+			}
+		} else {
+			action = parseScroll(moveXAbs, moveYAbs, downX, downY, upX, upY);
+		}
+		// Log.i(TAG, "action:" + action);
+		// System.out.println(TAG + "action:" + action);
+		// create script and save script
+		System.out.println("脚本生成。。。。");
+		// RecordPoint rp = new RecordPoint();
+		Pair.create(downX, downY, action);
+		return true;
+	}
+
+	private static boolean isClick(int moveX, int moveY) {
+		return Math.max(moveX, moveY) < 50;
+	}
+
+	private static RecordType parseScroll(int moveX, int moveY, int downX,
+			int downY, int upX, int upY) {
+		if (moveX > moveY) {
+			return upX > downX ? RecordType.SWIPE_RIGHTWARD
+					: RecordType.SWIPE_LEFTWARD;
+		} else {
+			return upY > downY ? RecordType.SWIPE_DOWNWARD
+					: RecordType.SWIPE_UPWARD;
+		}
+	}
+}
