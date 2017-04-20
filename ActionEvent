@@ -1,0 +1,170 @@
+package com.hpe.exec;
+
+
+//import com.hpe.exec.utils.AbstractParser;
+//import com.hpe.exec.utils.ByteString;
+//import com.hpe.exec.utils.CodedInputStream;
+//import com.hpe.exec.utils.CodedOutputStream;
+//import com.hpe.exec.utils.CommonMessage;
+//import com.hpe.exec.utils.Descriptors;
+//import com.hpe.exec.utils.ExtensionRegistryLite;
+//import com.hpe.exec.utils.GeneratedMessage;
+//import com.hpe.exec.utils.Internal;
+//import com.hpe.exec.utils.InvalidProtocolBufferException;
+//import com.hpe.exec.utils.Message;
+//import com.hpe.exec.utils.Parser;
+//import com.hpe.exec.utils.ProtocolMessageEnum;
+//import com.hpe.exec.utils.UnknownFieldSet;
+//import com.hpe.exec.utils.CommonMessage.ActionEventList.ActionEvent;
+//import com.hpe.exec.utils.CommonMessage.ActionEventList.ActionEvent.ActionType;
+//import com.hpe.exec.utils.CommonMessage.ActionEventList.ActionEvent.Builder;
+
+/**
+ * @author syl 2017/04/19 14:00
+ */
+public class ActionEvent {
+	private static final ActionEvent defaultInstance;
+	private int bitField0_;
+	public static final int ACTIONTYPE_FIELD_NUMBER = 1;
+	private ActionType actionType_;
+	public static final int MILLIS_FIELD_NUMBER = 2;
+	private long millis_;
+	public static final int EXTRA_FIELD_NUMBER = 3;
+	private int extra_;
+	private byte memoizedIsInitialized = -1;
+
+	private int memoizedSerializedSize = -1;
+	private static final long serialVersionUID = 0L;
+
+	private String str;
+
+	public String getStr() {
+		return "actionType_:" + actionType_ + ",extra_:" + extra_ + ",millis_:"
+				+ millis_;
+	}
+
+	public void setStr(String str) {
+		this.str = str;
+	}
+
+	public boolean hasActionType() {
+		return (this.bitField0_ & 0x1) == 1;
+	}
+
+	public ActionType getActionType() {
+		return this.actionType_;
+	}
+
+	public boolean hasMillis() {
+		return (this.bitField0_ & 0x2) == 2;
+	}
+
+	public long getMillis() {
+		return this.millis_;
+	}
+
+	public boolean hasExtra() {
+		return (this.bitField0_ & 0x4) == 4;
+	}
+
+	public int getExtra() {
+		return this.extra_;
+	}
+
+	public ActionType getActionType_() {
+		return actionType_;
+	}
+
+	public void setActionType_(ActionType actionType_) {
+		this.actionType_ = actionType_;
+	}
+
+	public long getMillis_() {
+		return millis_;
+	}
+
+	public void setMillis_(long millis_) {
+		this.millis_ = millis_;
+	}
+
+	public int getExtra_() {
+		return extra_;
+	}
+
+	public void setExtra_(int extra_) {
+		this.extra_ = extra_;
+	}
+
+	private void initFields() {
+		this.actionType_ = ActionType.PRESS_DOWN;
+		this.millis_ = 0L;
+		this.extra_ = 0;
+	}
+
+	public final boolean isInitialized() {
+		byte isInitialized = this.memoizedIsInitialized;
+		if (isInitialized != -1)
+			return isInitialized == 1;
+
+		if (!hasActionType()) {
+			this.memoizedIsInitialized = 0;
+			return false;
+		}
+		if (!hasMillis()) {
+			this.memoizedIsInitialized = 0;
+			return false;
+		}
+		this.memoizedIsInitialized = 1;
+		return true;
+	}
+
+	static {
+		defaultInstance = new ActionEvent();
+		defaultInstance.initFields();
+	}
+
+	public static enum ActionType {
+		PRESS_DOWN(0, 0),
+
+		PRESS_UP(1, 1),
+
+		POINT_COORD_X(2, 2),
+
+		POINT_COORD_Y(3, 3);
+
+		public static final int PRESS_DOWN_VALUE = 0;
+		public static final int PRESS_UP_VALUE = 1;
+		public static final int POINT_COORD_X_VALUE = 2;
+		public static final int POINT_COORD_Y_VALUE = 3;
+		private static final ActionType[] VALUES;
+		private final int index;
+		private final int value;
+
+		public final int getNumber() {
+			return this.value;
+		}
+
+		public static ActionType valueOf(int value) {
+			switch (value) {
+			case 0:
+				return PRESS_DOWN;
+			case 1:
+				return PRESS_UP;
+			case 2:
+				return POINT_COORD_X;
+			case 3:
+				return POINT_COORD_Y;
+			}
+			return null;
+		}
+
+		private ActionType(int index, int value) {
+			this.index = index;
+			this.value = value;
+		}
+
+		static {
+			VALUES = values();
+		}
+	}
+}
