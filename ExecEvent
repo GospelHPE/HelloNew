@@ -1,0 +1,149 @@
+package com.hpe.exec;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * @author syl 2017/04/19 14:00
+ */
+public class ExecEvent {
+
+	static String TAG = ExecEvent.class.getSimpleName();
+
+	private static List<ActionEvent> mActionEvents = new ArrayList<ActionEvent>();
+	private static List<ActionEvent> mActionEvents1 = new ArrayList<ActionEvent>();
+
+	final static StringBuffer inputbf = new StringBuffer("input:");
+	final static StringBuffer errorbf = new StringBuffer("error:");
+
+	static List<String> eventinfo = new ArrayList<String>();
+
+	public static List<String> getEventinfo() {
+		return eventinfo;
+	}
+
+	public static void setEventinfo(List<String> eventinfo) {
+		ExecEvent.eventinfo = eventinfo;
+	}
+
+	public static StringBuffer getInputbf() {
+		return inputbf;
+	}
+
+	public static StringBuffer getErrorbf() {
+		return errorbf;
+	}
+
+	public static void main(String[] args) throws IOException,
+			InterruptedException {
+		String cmd = "adb shell getevent -l";
+		execADBInput(cmd);
+		execADBError(cmd);
+		// new ActionUtils(mActionEvents).resolveAction();
+		// new Thread(new Runnable() {
+		//
+		// @Override
+		// public void run() {
+		// System.out.println("gospel:::" + getInputbf());
+		// }
+		// });
+	}
+
+	public static String execADBInput(String cmd) throws IOException,
+			InterruptedException {
+		System.out.println("**my getevent, cmd:" + cmd);
+		final Process process = Runtime.getRuntime().exec(cmd);
+		printMessageInput(process.getInputStream());
+		/*
+		 * the exit value of the process. By convention, <code>0</code>
+		 * indicates normal termination.
+		 */
+		int value = process.waitFor();
+		System.out.println("**my adb return" + value);
+		// return printMessageInput(process.getInputStream());
+		return inputbf.toString();
+	}
+
+	public static String execADBError(String cmd) throws IOException,
+			InterruptedException {
+		final Process process = Runtime.getRuntime().exec(cmd);
+		printMessageError(process.getErrorStream());
+		/*
+		 * the exit value of the process. By convention, <code>0</code>
+		 * indicates normal termination.
+		 */
+		int value = process.waitFor();
+		System.out.println("**my adb return" + value);
+		return errorbf.toString();
+	}
+
+	private static void printMessageInput(final InputStream input)
+			throws IOException, InterruptedException {
+		new Thread(new Runnable() {
+			public void run() {
+				Reader reader = new InputStreamReader(input);
+				BufferedReader bf = new BufferedReader(reader);
+				String line = null;
+				try {
+					int i = 0;
+					while ((line = bf.readLine()) != null) {
+						i++;
+						// System.out.println("Input" + i + "-" + line);
+						inputbf.append("\n" + i + "-  " + line);
+						// eventinfo.add(line);
+
+						ActionEvent event = ActionUtils.parseFromString(line,
+								System.currentTimeMillis());
+						if (event != null) {
+							// Logger.i(TAG, "event:" + event);
+							System.out.println(TAG + ": event:"
+									+ event.getStr());
+							mActionEvents.add(event);
+							// create script
+							new ActionUtils(mActionEvents).resolveAction();
+						}
+
+						if (event != null
+								&& event.getActionType().equals(
+										ActionType.PRESS_UP)) {
+							// Message msg = MessageHelper
+							// .createActionEventListMessage(mActionEvents);
+							// Server.getInstance().getSender()
+							// .sendCommandAsyn(msg);
+							mActionEvents.clear();
+						}
+					}
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}).start();
+		// return inputbf.toString();
+	}
+
+	private static void printMessageError(final InputStream input)
+			throws IOException, InterruptedException {
+		new Thread(new Runnable() {
+			public void run() {
+				Reader reader = new InputStreamReader(input);
+				BufferedReader bf = new BufferedReader(reader);
+				String line = null;
+				try {
+					int i = 0;
+					while ((line = bf.readLine()) != null) {
+						i++;
+						System.out.println("Error" + line);
+						errorbf.append("\n" + i + "-" + line);
+					}
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}).start();
+	}
+}
