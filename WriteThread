@@ -1,0 +1,66 @@
+
+
+	public boolean isWriteThreadLive = false;
+
+	// private static final String LOG_DIR = "/mnt/sdcard/xDevice/";
+	private static final String LOG_DIR = "D:\\mnt\\sdcard\\xDevice\\";
+	private static final String LOG_SERVICE_LOG_PATH = LOG_DIR
+			+ "recordscript.txt";
+
+	public ConcurrentLinkedQueue<Object> linkedQueue = new ConcurrentLinkedQueue<Object>();
+
+	public WriteThread() {
+		File file = new File(LOG_SERVICE_LOG_PATH);
+		if (file.exists()) {
+			if (file.length() > 50 * 1024 * 1024) {
+				File file1 = new File(LOG_DIR + "recordscript_bak.txt");
+				if (file1.exists()) {
+					file1.delete();
+				}
+
+				file.renameTo(file1);
+			}
+		}
+	}
+
+	@Override
+	public void run() {
+		isWriteThreadLive = true;
+		Gson gson = new Gson();
+		while (!linkedQueue.isEmpty()) {
+			try {
+				recordStringLog(gson.toJson(linkedQueue.poll()));
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+
+		isWriteThreadLive = false;
+	}
+
+	/**
+	 * @return
+	 **/
+	private void recordStringLog(String text) {
+		File file = new File(LOG_SERVICE_LOG_PATH);
+		if (!file.exists()) {
+			file.getParentFile().mkdirs();
+			try {
+				file.createNewFile();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+
+		try {
+			FileWriter filerWriter = new FileWriter(file, true);
+			BufferedWriter bufWriter = new BufferedWriter(filerWriter);
+			bufWriter.write(text);
+			bufWriter.newLine();
+			bufWriter.close();
+			filerWriter.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
