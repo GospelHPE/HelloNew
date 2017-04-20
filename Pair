@@ -1,0 +1,47 @@
+package com.hpe.exec;
+
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+
+import com.hpe.exec.RecordPoint.RecordType;
+import com.hpe.exec.script.WriteThread;
+
+public class Pair<T1, T2> {
+	private static OutputStreamWriter writer;
+	private static WriteThread writeThread = null;
+
+	public static Pair<RecordPoint, RecordType> create(int x, int y,
+			RecordType rt) {
+		System.out.println("写文件开始。。。。");
+		String str = "x:" + x + ",y:" + y + ",type:" + rt + "";
+		System.out.println(Pair.class.getSimpleName() + ":" + str);
+		if (writeThread == null || !writeThread.isWriteThreadLive) {
+			writeThread = new WriteThread();
+			writeThread.start();
+		}
+		// if(rt!=null) rp.setType(rt.get)
+		RecordPoint rp = new RecordPoint();
+		rp.setX(x);
+		rp.setY(y);
+		rp.setRecordType(rt);
+		writeThread.linkedQueue.add(rp);
+		rp = null;
+		return null;
+	}
+
+	public static void close() {
+		if (writer != null) {
+			try {
+				writer.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+
+		if (writeThread != null) {
+			writeThread.isWriteThreadLive = false;
+			writeThread = null;
+		}
+
+	}
+}
