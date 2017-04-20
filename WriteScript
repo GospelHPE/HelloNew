@@ -1,0 +1,32 @@
+
+
+	private static OutputStreamWriter writer;
+	private static WriteThread writeThread = null;
+
+	private static void writescript(String tag, String msg) {
+		Date time = new Date();
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss:SSS");
+		String dsNow = sdf.format(time);
+		String str = "log level i " + dsNow + "    " + tag + "  " + msg;
+		if (writeThread == null || !writeThread.isWriteThreadLive) {
+			writeThread = new WriteThread();
+			writeThread.start();
+		}
+		writeThread.linkedQueue.add(str);
+	}
+
+	public static void close() {
+		if (writer != null) {
+			try {
+				writer.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+
+		if (writeThread != null) {
+			writeThread.isWriteThreadLive = false;
+			writeThread = null;
+		}
+
+	}
