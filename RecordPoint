@@ -1,0 +1,117 @@
+package com.hpe.exec;
+
+/**
+ * @author syl 2017/04/19 14:00
+ */
+public class RecordPoint {
+
+	private static final RecordPoint defaultInstance;
+
+	private int x = 0;
+	private int y = 0;
+
+	private RecordType recordType;
+
+	public int getX() {
+		return x;
+	}
+
+	public void setX(int x) {
+		this.x = x;
+	}
+
+	public int getY() {
+		return y;
+	}
+
+	public void setY(int y) {
+		this.y = y;
+	}
+
+	public RecordType getRecordType() {
+		return recordType;
+	}
+
+	public void setRecordType(RecordType recordType) {
+		this.recordType = recordType;
+	}
+
+	private void initFields() {
+		this.recordType = RecordType.CLICK;
+		this.x = 0;
+		this.x = 0;
+	}
+
+	static {
+		defaultInstance = new RecordPoint();
+		defaultInstance.initFields();
+	}
+
+	/**
+	 * @author syl 2017/04/19 14:00
+	 */
+	public enum RecordType {
+		NONE(0, 0),
+
+		CLICK(1, 1),
+
+		LONGCLICK(2, 2),
+
+		SWIPE_RIGHTWARD(3, 3),
+
+		SWIPE_LEFTWARD(4, 4),
+
+		SWIPE_DOWNWARD(5, 5),
+
+		SWIPE_UPWARD(6, 6);
+
+		public static final int NONE_VALUE = 0;
+		public static final int CLICK_VALUE = 1;
+		public static final int LONGCLICK_VALUE = 2;
+		public static final int SWIPE_RIGHTWARD_VALUE = 3;
+		public static final int SWIPE_LEFTWARD_VALUE = 4;
+		public static final int SWIPE_DOWNWARD_VALUE = 5;
+		public static final int SWIPE_UPWARD_VALUE = 6;
+		private static final RecordType[] VALUES;
+		private final int index;
+		private final int value;
+
+		public final int getNumber() {
+			return this.value;
+		}
+
+		public static RecordType valueOf(int value) {
+			switch (value) {
+			case 0:
+				return NONE;
+			case 1:
+				return CLICK;
+			case 2:
+				return LONGCLICK;
+			case 3:
+				return SWIPE_RIGHTWARD;
+			case 4:
+				return SWIPE_LEFTWARD;
+			case 5:
+				return SWIPE_DOWNWARD;
+			case 6:
+				return SWIPE_UPWARD;
+			}
+			return null;
+		}
+
+		private RecordType(int index, int value) {
+			this.index = index;
+			this.value = value;
+		}
+
+		static {
+			VALUES = values();
+		}
+
+		@Override
+		public String toString() {
+			return this.index + "_" + this.value;
+		}
+	}
+}
