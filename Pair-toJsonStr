@@ -1,0 +1,87 @@
+package com.hpe.exec;
+
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+
+import com.hpe.exec.RecordPoint.RecordType;
+import com.hpe.exec.script.WriteThread;
+
+public class Pair<T1, T2> {
+	private static OutputStreamWriter writer;
+	private static WriteThread writeThread = null;
+
+	public static void create(int x, int y, RecordType rt, long pressUpTime) {
+		System.out.println("脚本保存");
+		String str = "x:" + x + ",y:" + y + ",type:" + rt + "";
+		System.out.println(Pair.class.getSimpleName() + ":" + str);
+		if (writeThread == null || !writeThread.isWriteThreadLive) {
+			writeThread = new WriteThread();
+			writeThread.start();
+		}
+		// if(rt!=null) rp.setType(rt.get)
+		RecordPoint rp = new RecordPoint();
+		rp.setX(x);
+		rp.setY(y);
+		// rp.setRecordType(rt);
+		// {"x":-1,"y":-1,"recordType":"CLICK"}
+
+		// String jsonStr = "{\"x\":-1,\"y\":-1,\"recordType\":\"CLICK\"}";
+		writeThread.linkedQueue.add(toJsonStr(x, y, rt, pressUpTime));
+		rp = null;
+		// return null;
+	}
+
+	public static String toJsonStr(Object s1, Object s2, Object s3, Object s4) {
+		StringBuffer jsonStr = new StringBuffer();
+		jsonStr.append('{');
+		jsonStr.append('"');
+		jsonStr.append('x');
+		jsonStr.append('"');
+		jsonStr.append(':');
+		jsonStr.append('"');
+		jsonStr.append(s1);
+		jsonStr.append('"');
+		jsonStr.append(',');
+		jsonStr.append('"');
+		jsonStr.append('y');
+		jsonStr.append('"');
+		jsonStr.append(':');
+		jsonStr.append('"');
+		jsonStr.append(s2);
+		jsonStr.append('"');
+		jsonStr.append(',');
+		jsonStr.append('"');
+		jsonStr.append("recordType");
+		jsonStr.append('"');
+		jsonStr.append(':');
+		jsonStr.append('"');
+		jsonStr.append(s3);
+		jsonStr.append('"');
+		jsonStr.append(',');
+		jsonStr.append('"');
+		jsonStr.append("pressTime");
+		jsonStr.append('"');
+		jsonStr.append(':');
+		jsonStr.append('"');
+		jsonStr.append(s4);
+		jsonStr.append('"');
+		jsonStr.append('}');
+		return jsonStr.toString();
+	}
+
+	public static void close() {
+		if (writer != null) {
+			try {
+				writer.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+
+		if (writeThread != null) {
+			writeThread.isWriteThreadLive = false;
+			writeThread = null;
+		}
+
+	}
+}
