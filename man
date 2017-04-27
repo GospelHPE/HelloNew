@@ -1,0 +1,80 @@
+package com.huawei.floatgetevent;
+
+import java.io.DataOutputStream;
+import java.io.IOException;
+
+import android.app.Activity;
+import android.os.Bundle;
+import android.util.Log;
+import android.widget.Toast;
+
+public class MainActivity extends Activity {
+	private static final String TAG = "shell";
+	private static final String CMD = "run_bktools.sh";
+
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.activity_main);
+		System.out.println("gospel00 activity_main");
+		int result = -1;
+		System.out.println("gospel01:" + result);
+		result = execRootCmdsilent(CMD);
+		System.out.println("gospel02:" + result);
+		// 查看返回值 如果是-1就fail
+		if (result == -1) {
+			Toast.makeText(getApplicationContext(), "fail", 0).show();
+		} else {
+			Toast.makeText(getApplicationContext(), "sucess", 0).show();
+		}
+
+		// Intent intent = new Intent(MainActivity.this,
+		// FloatEventService.class);
+		// intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+		// startService(intent);
+		// finish();// ���ӻ�ܳ�
+	}
+
+	// 执行shell命令的方法
+	private int execRootCmdsilent(String cmd) {
+		int result = -1;
+		DataOutputStream dos = null;
+		try {
+			// 申请su权限
+			Process p = Runtime.getRuntime().exec(cmd);
+			System.out.println("gospel:" + p);
+			// 拿到输出流
+			dos = new DataOutputStream(p.getOutputStream());
+			System.out.println("gospel2:" + dos);
+			Log.i(TAG, cmd);
+			System.out.println("gospel3:" + cmd);
+			dos.writeBytes(cmd + "\n");
+			System.out.println("gospel4:" + cmd);
+			dos.flush();
+			dos.writeBytes("exit\n");
+			dos.flush();
+			p.waitFor();
+			// 改变退出的命令的值
+			result = p.exitValue();
+			// 将成功信息打印出来
+			Log.i(TAG, "Success execRootCmdSilent(" + cmd + ")=" + result);
+		} catch (Exception e) {
+			// TODO: handle exception
+			Log.i(TAG, "fail execRootCmdSilent(" + cmd + ")" + result);
+			e.printStackTrace();
+		} finally {
+			if (dos != null) {
+				try {
+					dos.close();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+
+			}
+
+		}
+
+		return result;
+	}
+}
