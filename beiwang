@@ -1,0 +1,47 @@
+手机远程测试环境
+10.78.75.9 jingbo box
+pxdevice   ascend@2012
+
+10.78.155.56 peitong box
+pxdevice   ascend@2012
+
+svn:
+http://10.57.86.156:81/svn/Web/
+
+start service
+adb shell am startservice -n com.huawei.xdevice.floatrobot.service/com.huawei.xdevice.floatrobot.service.FloatToolsService
+
+获取手机的文件到PC
+adb pull /mnt/sdcard/xDevice/recordscript.txt
+
+遇到获取手机问题权限问题，或者往手机push文件权限问题，都先执行以下“adb remount”
+
+
+重签名：
+D:\signApkTool\signApkTool\signapk.bat ws433814 amen!-00 platform D:\signApkTool\signApkTool\FloatRobot.apk
+
+安装：
+adb install -r FloatRobot.apk
+
+日志输出
+adb logcat > d:log.txt
+
+jar转换android jar命令
+
+先用eclipse到处jar文件
+进到sdk的版本目录：如：sdk\build-tools\android-4.4w下
+执行 ：
+将jar包转换成android可执行的jar文件
+dx --dex --output=classes.dex getevent.jar(用eclipse导出的jar文件)
+将dex文件加到jar里面
+aapt add getevent.jar classes.dex 
+将jar推到手机里
+adb push getevent.jar /system/framework
+
+运行jar文件
+
+赋777权限，必须进到adb shell 里面，目标对象的所在目录下
+chmod 777 getevent.jar 执行这个命令必须在getevent.jar 所在的目录下.建议在/system/framework安卓的核心包
+
+export CLASSPATH=/system/framework/getevent.jar
+app_process /system/framework com.hpe.exec.ExecEvent
