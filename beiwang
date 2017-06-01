@@ -9,7 +9,7 @@ svn:
 http://10.57.86.156:81/svn/Web/
 
 start service
-adb shell am startservice -n com.huawei.xdevice.floatrobot.service/com.huawei.xdevice.floatrobot.service.FloatToolsService
+adb shell am startservice -n com.dxc.floatrobot.service/com.dxc.service.FloatToolsService
 
 获取手机的文件到PC
 adb pull /mnt/sdcard/xDevice/recordscript.txt
